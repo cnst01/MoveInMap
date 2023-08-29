@@ -64,7 +64,24 @@ class Robot:
         self.moveY(y - self.position[1])
 
 
+'''
+Orientações de uso:
 
+- Sempre crie o obj Robot passando por parâmetro:
+    - idx motor esquerdo
+    - idx motor direito
+    - posição inicial do robô
+        - sendo x,y,direção
+            - direção deve ser iniciada como 0, 
+            paralelo ao eixo Y
+
+- A função GoTo() executa o movimento primeiro no eixo X 
+para depois fazer o eixo Y
+
+- Os objs do tipo Map permitem adição de vetores através do método 
+addPoint(), lembrando que possuem direção
+
+'''
 
 def main():
     robo = Robot('F', 'B')
