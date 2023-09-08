@@ -47,7 +47,7 @@ class Robot:
             print('moving ' + str(q) + ' on X')
             self.position[0] += q
             self.map.addPoint(self.position)
-    
+
     def moveY(self,q):
         if q :
             if q > 0:
@@ -58,11 +58,14 @@ class Robot:
             print('moving ' + str(q) + ' on Y')
             self.position[1] += q
             self.map.addPoint(self.position)
-    
 
-    def goTo(self,x,y):
+
+    def goTo(self,[x,y]):
         self.moveX(x + (-1*self.position[0]))
-        self.moveY(y + (-1*self.position[1]))
+        self.moveY(y + (-1*self.position[0]))
+    def goTo2(self,[x,y]):
+        self.moveY(y + (-1*self.position[0]))
+        self.moveX(x + (-1*self.position[0]))
 
 class HubController:
     def __init__(self,motorE,motorD, position = [0,0,0]):
@@ -81,7 +84,7 @@ class HubController:
                     screen_number += 1
                 else:
                     screen_number = 0
-            self.robo.hub.light_matrix.write(screen_names[screen_number])        
+            self.robo.hub.light_matrix.write(screen_names[screen_number])
         return screen_names[screen_number]
 
     def do(self,screen):
@@ -136,6 +139,48 @@ addPoint(), lembrando que possuem direção
 
 '''
 
+def alinhar():
+    return 1
+def abrirgarra():
+    return 1
+def fechargarra():
+    return 1
+
 def main():
-    robo = Robot('E', 'F')
-    control = HubController('E','F')
+    petroleo = [123123,12]
+    animal_enfermo1 = [-2.24,7.28]
+    destino_enfermo1 = [56,-10.5]
+    animal_enfermo2 = [-20.72,15.68]
+    destino_enfermo2 = [47,-10.5]
+    animal_enfermo3 = [9.52,22.96]
+    destino_enfermo3 = [48.24,-6.16]
+    animal_encalhado1 = [-2.24,7.28]
+    animal_encalhado2 = [-20.72,15.68]
+    animal_encalhado3 = [9.52,22.96]
+    destino_encalhado1 = [,57]
+    destino_encalhado2 = []
+    destino_encalhado3 = []
+    robo = Robot('F', 'B')
+    control = HubController('F','B')
+    
+    alinhar()
+    #animais enfermos
+    robo.goTo2(0,0)
+    abrirgarra()
+    robo.goTo(animal_enfermo1)
+    fechargarra()
+    robo.goTo2(destino_enfermo1)
+    abrirgarra()
+    robo.goTo(0,0)
+    robo.goTo(animal_enfermo2)
+    fechargarra()
+    robo.goTo2(destino_enfermo2)
+    abrirgarra()
+    robo.goTo(0,0)
+    robo.goTo(animal_enfermo3)
+    fechargarra()
+    robo.goTo2(destino_enfermo3)
+    abrirgarra()
+    robo.goTo(0,0)
+    #animais encalhados
+main()
