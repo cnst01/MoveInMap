@@ -62,7 +62,7 @@ class Robot:
 
     def goTo(self,x,y):
         self.moveX(x + (-1*self.position[0]))
-        self.moveY(y + (-1*self.position[0]))
+        self.moveY(y + (-1*self.position[1]))
 
 class HubController:
     def __init__(self,motorE,motorD, position = [0,0,0]):
