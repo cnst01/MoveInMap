@@ -145,28 +145,47 @@ def abrirgarra():
     return 1
 def fechargarra():
     return 1
-
+def subrirRampa():
+    return 1
 def main():
-    petroleo = [123123,12]
-    animal_enfermo1 = [-2.24,7.28]
-    destino_enfermo1 = [56,-10.5]
-    animal_enfermo2 = [-20.72,15.68]
-    destino_enfermo2 = [47,-10.5]
-    animal_enfermo3 = [9.52,22.96]
-    destino_enfermo3 = [48.24,-6.16]
-    animal_encalhado1 = [-2.24,7.28]
-    animal_encalhado2 = [-20.72,15.68]
-    animal_encalhado3 = [9.52,22.96]
-    destino_encalhado1 = [,57]
-    destino_encalhado2 = []
-    destino_encalhado3 = []
+    petroleo = []
+    animal_enfermo1 = [-7.4,-42.2]
+    animal_enfermo2 = [-5.5,15.5]
+    animal_enfermo3 = [16.0,45.5]
+    destino_enfermo1 = [102,-13]
+    destino_enfermo2 = [88,-13]
+    destino_enfermo3 = [95,-3.5]
+    animal_encalhado1 = [-91.7,-32.0]
+    animal_encalhado2 = [-51.0,-19.0]
+    animal_encalhado3 = [-7.4,-42.2]
+    destino_encalhado1 = [-16,52.5]
+    destino_encalhado2 = [10.5, 52.5]
+    destino_encalhado3 = [37.2,52.5]
+    petroleo = [-94.0,45.9]
+    frenterampa = [57,11]
     robo = Robot('F', 'B')
     control = HubController('F','B')
-    
+
     alinhar()
-    #animais enfermos
-    robo.goTo2(0,0)
+    #animais encalhados
+    robo.goTo(0,0)
     abrirgarra()
+    robo.goTo(animal_encalhado1)
+    fechargarra()
+    robo.goTo2(destino_encalhado1)
+    abrirgarra()
+    robo.goTo(0,0)
+    robo.goTo(animal_encalhado2)
+    fechargarra()
+    robo.goTo2(destino_encalhado2)
+    abrirgarra()
+    robo.goTo(0,0)
+    robo.goTo(animal_encalhado3)
+    fechargarra()
+    robo.goTo2(destino_encalhado3)
+    abrirgarra()
+    robo.goTo(0,0)
+    #animais enfermos
     robo.goTo(animal_enfermo1)
     fechargarra()
     robo.goTo2(destino_enfermo1)
@@ -182,5 +201,17 @@ def main():
     robo.goTo2(destino_enfermo3)
     abrirgarra()
     robo.goTo(0,0)
-    #animais encalhados
-main()
+    #trocargarra
+    robo.goTo(frenteRampa)
+    subirRampa()
+    
+    #petroleo
+    robo.goTo(petroleo)
+    fechargarra()
+    robo.goTo(0,0)
+    robo.goTo(frenteRampa)
+    subirRampa()
+    abrirGarra()
+
+
+main()     
