@@ -1,6 +1,6 @@
-from mindstorms import MSHub, Motor, MotorPair, ColorSensor, DistanceSensor, App, ForceSensor
-from mindstorms.control import wait_for_seconds, wait_until, Timer
-from mindstorms.operator import greater_than, greater_than_or_equal_to, less_than, less_than_or_equal_to, equal_to, not_equal_to
+import MSHub, Motor, MotorPair, ColorSensor, DistanceSensor, App, ForceSensor
+import wait_for_seconds, wait_until, Timer
+import greater_than, greater_than_or_equal_to, less_than, less_than_or_equal_to, equal_to, not_equal_to
 import math
 
 class myMap:
@@ -62,7 +62,7 @@ class Robot:
 
     def goTo(self,x,y):
         self.moveX(x + (-1*self.position[0]))
-        self.moveY(y + (-1*self.position[0]))
+        self.moveY(y + (-1*self.position[1]))
 
 class HubController:
     def __init__(self,motorE,motorD, position = [0,0,0]):
