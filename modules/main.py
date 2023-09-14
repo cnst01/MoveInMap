@@ -15,13 +15,14 @@ class myMap:
             self.points += [pos]
 
 class Robot:
-    def __init__ (self,motorE,motorD, position = [0,0,0]):
+    def __init__ (self,motorE,motorD,force_sensor_port = None,position = [0,0,0]):
         self.position = position
         self.map = myMap(self.position)
         self.motors = MotorPair(motorE, motorD)
         self.hub = MSHub()
         self.hub.motion_sensor.reset_yaw_angle()
-        self.force_sensor = ForceSensor('A')
+        if force_sensor_port:
+            self.force_sensor = ForceSensor(force_sensor_port)
 
     def pointTo(self, degrees, precision = 1):
         dir = self.position[2]
@@ -65,8 +66,8 @@ class Robot:
         self.moveY(y + (-1*self.position[1]))
 
 class HubController:
-    def __init__(self,motorE,motorD, position = [0,0,0]):
-        self.robo = Robot(motorE,motorD, position)
+    def __init__(self,motorE,motorD,force_sensor_port,position = [0,0,0]):
+        self.robo = Robot(motorE,motorD,force_sensor_port,position)
         while True:
             self.do(self.beginScreen())
             print(self.robo.map.points)
@@ -138,4 +139,4 @@ addPoint(), lembrando que possuem direção
 
 def main():
     robo = Robot('E', 'F')
-    control = HubController('E','F')
+    control = HubController('E','F','A')
