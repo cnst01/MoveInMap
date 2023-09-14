@@ -82,6 +82,10 @@ class Robot:
         self.position[1] += y
         self.map.addPoint(self.position)
         return 1
+    
+    def doRoute(self, pointlist):
+        for point in pointlist:
+            self.goTo(point[0],point[1])
 
 class HubController:
     def __init__(self,motorE,motorD,force_sensor_port,position = [0,0,0]):
