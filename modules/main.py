@@ -1,6 +1,5 @@
 import MSHub, Motor, MotorPair, ColorSensor, DistanceSensor, App, ForceSensor
 import wait_for_seconds, wait_until, Timer
-import greater_than, greater_than_or_equal_to, less_than, less_than_or_equal_to, equal_to, not_equal_to
 import math
 
 class myMap:
@@ -60,10 +59,29 @@ class Robot:
             self.position[1] += q
             self.map.addPoint(self.position)
     
-
     def goTo(self,x,y):
-        self.moveX(x + (-1*self.position[0]))
-        self.moveY(y + (-1*self.position[1]))
+        x = x + (-1*self.position[0])
+        y = y + (-1*self.position[1])
+        dist = math.sqrt(x**2 + y**2)
+        if x != 0 and y > 0:
+            self.pointTo(math.degrees(math.atan(x/y)))
+        elif x > 0 and y < 0:
+            self.pointTo(90 + abs(math.degrees(math.atan(y/x))))
+        elif x < 0 and y < 0:
+            self.pointTo(-90 - abs(math.degrees(math.atan(y/x))))
+        elif x == 0 and y != 0:
+            self.moveY(y)
+            return 1
+        elif x != 0 and y == 0:
+            self.moveX(x)
+            return 1
+        else:
+            return 0
+        self.motors.move(dist,'cm', 0, 50)
+        self.position[0] += x
+        self.position[1] += y
+        self.map.addPoint(self.position)
+        return 1
 
 class HubController:
     def __init__(self,motorE,motorD,force_sensor_port,position = [0,0,0]):
