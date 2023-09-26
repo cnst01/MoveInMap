@@ -100,31 +100,15 @@ class Robot:
         self.map.addPoint(self.position)
         return 1
 
-    def doRoute(self, pointlist):
+    def doRoute(self, pointlist, goandback = 'go'):
         for point in pointlist:
             self.goTo(point[0],point[1])
-
-'''
-Orientações de uso:
-
-- Sempre crie o obj Robot passando por parâmetro:
-    - idx motor esquerdo
-    - idx motor direito
-    - posição inicial do robô
-        - sendo x,y,direção
-            - direção deve ser iniciada como 0,
-            paralelo ao eixo Y
-
-- A função GoTo() executa o movimento primeiro no eixo X
-para depois fazer o eixo Y
-
-- Os objs do tipo Map permitem adição de vetores através do método
-addPoint(), lembrando que possuem direção
-
-'''
+        if goandback == 'go_comeback':
+            lista = self.map.points.copy()
+            lista.reverse()
+            self.doRoute(lista)
 
 def main():
     robo = Robot('A', 'B')
-
-
+    print(robo.map.points)
 main()
