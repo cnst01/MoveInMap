@@ -100,15 +100,86 @@ class Robot:
         self.map.addPoint(self.position)
         return 1
 
-    def doRoute(self, pointlist, goandback = 'go'):
+    def doRoute(self, pointlist):
         for point in pointlist:
             self.goTo(point[0],point[1])
-        if goandback == 'go_comeback':
-            lista = self.map.points.copy()
-            lista.reverse()
-            self.doRoute(lista)
+
+class HubController:
+    def __init__(self,motorE,motorD,force_sensor_port,position = [0,0,0]):
+        self.robo = Robot(motorE,motorD,force_sensor_port,position)
+        while True:
+            self.do(self.beginScreen())
+            print(self.robo.map.points)
+
+    def beginScreen(self):
+        screen_names = ['GOTO', 'X', 'Y']
+        screen_number = 0
+        while not self.robo.force_sensor.is_pressed():
+            if self.robo.hub.right_button.was_pressed():
+                self.robo.hub.right_button.wait_until_released()
+                if screen_number < 2:
+                    screen_number += 1
+                else:
+                    screen_number = 0
+            self.robo.hub.light_matrix.write(screen_names[screen_number])
+        return screen_names[screen_number]
+
+    def do(self,screen):
+        self.robo.force_sensor.wait_until_released()
+        if screen == 'GOTO':
+            point = [0,0]
+            for i in range(2):
+                while not self.robo.force_sensor.is_pressed():
+                    if self.robo.hub.right_button.was_pressed():
+                        self.robo.hub.right_button.wait_until_released()
+                        point[i] += 1
+                    elif self.robo.hub.left_button.was_pressed():
+                        self.robo.hub.left_button.wait_until_released()
+                        point[i] -= 1
+                    self.robo.hub.light_matrix.write(point[i])
+                self.robo.force_sensor.wait_until_released()
+            self.robo.goTo(point[0],point[1])
+            return 1
+        else:
+            value = 0
+            while not self.robo.force_sensor.is_pressed():
+                if self.robo.hub.right_button.was_pressed():
+                    self.robo.hub.right_button.wait_until_released()
+                    value += 1
+                elif self.robo.hub.left_button.was_pressed():
+                    self.robo.hub.left_button.wait_until_released()
+                    value -= 1
+                self.robo.hub.light_matrix.write(value)
+            self.robo.force_sensor.wait_until_released()
+            if screen == 'X':
+                self.robo.moveX(value)
+            else:
+                self.robo.moveY(value)
+            return 1
+
+'''
+Orientações de uso:
+
+- Sempre crie o obj Robot passando por parâmetro:
+    - idx motor esquerdo
+    - idx motor direito
+    - posição inicial do robô
+        - sendo x,y,direção
+            - direção deve ser iniciada como 0,
+            paralelo ao eixo Y
+
+- A função GoTo() executa o movimento primeiro no eixo X
+para depois fazer o eixo Y
+
+- Os objs do tipo Map permitem adição de vetores através do método
+addPoint(), lembrando que possuem direção
+
+'''
 
 def main():
     robo = Robot('A', 'B')
-    print(robo.map.points)
+    robo.calibrateDirTo(90)
+    # robo.goTo(-30,10)
+    # control = HubController('E','F','A')
+
 main()
