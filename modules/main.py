@@ -13,10 +13,20 @@ class myMap:
         if not pos in self.points:
             self.points += [pos]
 
+class Claw:
+    def __init__(self, claw_port):
+        self.motor = Motor(claw_port)
+    def Open(self):
+        self.motor.run_for_rotations(3,100)
+    def Close(self):
+        self.motor.run_for_rotations(3,-100)
+
 class Robot:
-    def __init__ (self,motorE,motorD,force_sensor_port = None,position = [0,0,0]):
+    def __init__ (self,motorE,motorD, claw_port = None ,force_sensor_port = None, speed = None, position = [0,0,0]):
+        self.speed = speed
         self.position = position
         self.map = myMap(self.position)
+        self.claw = Claw(claw_port)
         self.motors = MotorPair(motorE, motorD)
         self.hub = MSHub()
         self.hub.motion_sensor.reset_yaw_angle()
@@ -60,7 +70,7 @@ class Robot:
                 self.pointTo(90)
             else:
                 self.pointTo(-90)
-            self.motors.move(abs(q),'cm', 0, 50)
+            self.motors.move(abs(q),'cm', 0, self.speed)
             print('moving ' + str(q) + ' on X')
             self.position[0] += q
             self.map.addPoint(self.position)
@@ -71,7 +81,7 @@ class Robot:
                 self.pointTo(0)
             else:
                 self.pointTo(178)
-            self.motors.move(abs(q),'cm', 0, 50)
+            self.motors.move(abs(q),'cm', 0, self.speed)
             print('moving ' + str(q) + ' on Y')
             self.position[1] += q
             self.map.addPoint(self.position)
@@ -94,7 +104,7 @@ class Robot:
             return 1
         else:
             return 0
-        self.motors.move(dist,'cm', 0, 50)
+        self.motors.move(dist,'cm', 0, self.speed)
         self.position[0] += x
         self.position[1] += y
         self.map.addPoint(self.position)
@@ -107,6 +117,13 @@ class Robot:
             lista = self.map.points.copy()
             lista.reverse()
             self.doRoute(lista)
+    
+    def goBack(self, dist):
+        self.motors.move(dist,'cm', 0, -self.speed)
+        x = abs(dist * math.cos(self.position[2]))
+        y = abs(dist * math.sin(self.position[2]))
+        self.position[0] -= x
+        self.position[1] -= y
 
 def main():
     robo = Robot('A', 'B')
