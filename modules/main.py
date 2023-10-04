@@ -108,7 +108,7 @@ class Robot:
         self.position[0] += x
         self.position[1] += y
         self.map.addPoint(self.position)
-        return 1
+        return dist
 
     def doRoute(self, pointlist, goandback = 'go'):
         for point in pointlist:
@@ -117,15 +117,20 @@ class Robot:
             lista = self.map.points.copy()
             lista.reverse()
             self.doRoute(lista)
-    
-    def goBack(self, dist):
-        self.motors.move(dist,'cm', 0, -self.speed)
-        x = abs(dist * math.cos(self.position[2]))
-        y = abs(dist * math.sin(self.position[2]))
-        self.position[0] -= x
-        self.position[1] -= y
+
+    def goBack(self):
+        print(self.map.points[-2])
+        destiny = self.map.points[-2]
+        x = int( destiny[0] + (-1*self.position[0]) )
+        y = int( destiny[1] + (-1*self.position[1]) )
+        dist = math.sqrt(x**2 + y**2)
+        self.motors.move(dist,'cm', 0, -50)
+        self.position = destiny
 
 def main():
-    robo = Robot('A', 'B')
+    robo = Robot('F','B','A')
+    robo.goTo(12,16)
+    robo.goBack()
+    print(robo.position)
     print(robo.map.points)
 main()
