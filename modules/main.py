@@ -16,18 +16,20 @@ class myMap:
 class Claw:
     def __init__(self, claw_port):
         self.motor = Motor(claw_port)
+        self.motor.set_stop_action('hold')
     def Open(self):
-        self.motor.run_for_rotations(3,100)
+        self.motor.run_for_rotations(0.25,-25)
     def Close(self):
-        self.motor.run_for_rotations(3,-100)
+        self.motor.run_for_rotations(0.30,15)
 
 class Robot:
-    def __init__ (self,motorE,motorD, claw_port = None ,force_sensor_port = None, speed = None, position = [0,0,0]):
+    def __init__ (self,motorE,motorD, claw_port = None, position = [0,0,0] ,force_sensor_port = None, speed = 30):
         self.speed = speed
         self.position = position
         self.map = myMap(self.position)
         self.claw = Claw(claw_port)
         self.motors = MotorPair(motorE, motorD)
+        self.motors.set_stop_action('hold')
         self.hub = MSHub()
         self.hub.motion_sensor.reset_yaw_angle()
         if force_sensor_port:
@@ -37,15 +39,19 @@ class Robot:
         dir = self.position[2]
         if(dir < degrees):
             while not self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
-                self.motors.start_tank(20,-20)
+                self.motors.move_tank(1,'degrees',10,-10)
             self.motors.stop()
         else:
             while not self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
-                self.motors.start_tank(-20,20)
+                self.motors.move_tank(1,'degrees',-10,10)
             self.motors.stop()
-        print('turning ' + str(degrees) + ' degrees')
+        print('turning to' + str(degrees) + ' degrees')
         self.position[2] = self.hub.motion_sensor.get_yaw_angle()
         self.map.points[-1][2] = self.position[2]
+        if self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
+            print("Succeded")
+        else:
+            self.pointTo(degrees)
 
     def calibrateDirTo(self, goal, precision = 1):
         dir = self.position[2]
@@ -87,15 +93,15 @@ class Robot:
             self.map.addPoint(self.position)
 
     def goTo(self,x,y):
-        x = int( x + (-1*self.position[0]) )
-        y = int( y + (-1*self.position[1]) )
+        x =  x + (-1*self.position[0])
+        y =  y + (-1*self.position[1])
         dist = math.sqrt(x**2 + y**2)
         if x != 0 and y > 0:
-            self.pointTo(int(math.degrees(math.atan(x/y))))
+            self.pointTo(round(math.degrees(math.atan(x/y))))
         elif x > 0 and y < 0:
-            self.pointTo(90 + int(abs(math.degrees(math.atan(y/x)))))
+            self.pointTo(90 + round(abs(math.degrees(math.atan(y/x)))))
         elif x < 0 and y < 0:
-            self.pointTo(-90 - int(abs(math.degrees(math.atan(y/x)))))
+            self.pointTo(-90 - round(abs(math.degrees(math.atan(y/x)))))
         elif x == 0 and y != 0:
             self.moveY(y)
             return 1
@@ -108,7 +114,7 @@ class Robot:
         self.position[0] += x
         self.position[1] += y
         self.map.addPoint(self.position)
-        return dist
+        return 1
 
     def doRoute(self, pointlist, goandback = 'go'):
         for point in pointlist:
@@ -118,19 +124,16 @@ class Robot:
             lista.reverse()
             self.doRoute(lista)
 
-    def goBack(self):
-        print(self.map.points[-2])
-        destiny = self.map.points[-2]
-        x = int( destiny[0] + (-1*self.position[0]) )
-        y = int( destiny[1] + (-1*self.position[1]) )
-        dist = math.sqrt(x**2 + y**2)
-        self.motors.move(dist,'cm', 0, -50)
-        self.position = destiny
+    def goBack(self, dist):
+        self.motors.move(dist,'cm', 0, -self.speed)
+        x = abs(dist * math.cos(self.position[2]))
+        y = abs(dist * math.sin(self.position[2]))
+        self.position[0] -= x
+        self.position[1] -= y
+        self.map.addPoint(self.position)
+
 
 def main():
-    robo = Robot('F','B','A')
-    robo.goTo(12,16)
-    robo.goBack()
-    print(robo.position)
+    robo = Robot('B', 'F', 'A')
     print(robo.map.points)
 main()
