@@ -37,7 +37,7 @@ class Robot:
 
     def pointTo(self, degrees, precision = 1):
         dir = self.position[2]
-        if(dir < degrees):
+        if(dir < degrees and abs(dir - degrees) < 180):
             while not self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
                 self.motors.move_tank(1,'degrees',10,-10)
             self.motors.stop()
