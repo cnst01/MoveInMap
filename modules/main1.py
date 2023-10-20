@@ -18,9 +18,9 @@ class Claw:
         self.motor = Motor(claw_port)
         self.motor.set_stop_action('hold')
     def Open(self):
-        self.motor.run_for_rotations(0.25,-25)
+        self.motor.run_for_rotations(0.3,-25)
     def Close(self):
-        self.motor.run_for_rotations(0.30,15)
+        self.motor.run_for_rotations(0.3,15)
 
 class Robot:
     def __init__ (self,motorE,motorD, claw_port = None, position = [0,0,0] ,force_sensor_port = None, speed = 30):
@@ -35,9 +35,12 @@ class Robot:
         if force_sensor_port:
             self.force_sensor = ForceSensor(force_sensor_port)
 
+    def setRoboPosition(self,pos):
+        self.position = pos
+
     def pointTo(self, degrees, precision = 1):
         dir = self.position[2]
-        if(dir < degrees):
+        if(dir < degrees and abs(dir - degrees) < 180):
             while not self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
                 self.motors.start_tank(10,-10)
             self.motors.stop()
@@ -45,9 +48,13 @@ class Robot:
             while not self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
                 self.motors.start_tank(-10,10)
             self.motors.stop()
-        print('turning ' + str(degrees) + ' degrees')
+        print('turning to' + str(degrees) + ' degrees')
         self.position[2] = self.hub.motion_sensor.get_yaw_angle()
         self.map.points[-1][2] = self.position[2]
+        if self.hub.motion_sensor.get_yaw_angle() in range(degrees - precision, degrees + precision):
+            print("Succeded")
+        else:
+            self.pointTo(degrees)
 
     def calibrateDirTo(self, goal, precision = 1):
         dir = self.position[2]
@@ -89,15 +96,15 @@ class Robot:
             self.map.addPoint(self.position)
 
     def goTo(self,x,y):
-        x = int( x + (-1*self.position[0]) )
-        y = int( y + (-1*self.position[1]) )
+        x =x + (-1*self.position[0])
+        y =y + (-1*self.position[1])
         dist = math.sqrt(x**2 + y**2)
         if x != 0 and y > 0:
-            self.pointTo(int(math.degrees(math.atan(x/y))))
+            self.pointTo(round(math.degrees(math.atan(x/y))))
         elif x > 0 and y < 0:
-            self.pointTo(90 + int(abs(math.degrees(math.atan(y/x)))))
+            self.pointTo(90 + round(abs(math.degrees(math.atan(y/x)))))
         elif x < 0 and y < 0:
-            self.pointTo(-90 - int(abs(math.degrees(math.atan(y/x)))))
+            self.pointTo(-90 - round(abs(math.degrees(math.atan(y/x)))))
         elif x == 0 and y != 0:
             self.moveY(y)
             return 1
@@ -126,15 +133,26 @@ class Robot:
         y = abs(dist * math.sin(self.position[2]))
         self.position[0] -= x
         self.position[1] -= y
+        self.map.addPoint(self.position)
+
+robo = Robot('F', 'B', 'A', [0,0,0])
+
+def realign():
+    last_x = robo.position[0]
+    robo.pointTo(0)
+    robo.motors.move(5, 'seconds', 0, -50)
+    robo.setRoboPosition([last_x,-60,0])
 
 def main():
-    
-    animal_enfermo1 = [-38.5,27.3]
-    animal_enfermo2 = [-5.5,10.5]
-    animal_enfermo3 = [15.0,43.5]
-    destino_enfermo1 = [88,2]
-    destino_enfermo2 = [88,-13]
-    destino_enfermo3 = [95,-3.5]
+
+
+    animal_enfermo1 = [-38.5,32]
+    animal_enfermo2 = [-6,17.5]
+    animal_enfermo3 = [15.0,45]
+    p_medio_enfermo = [100,-30]
+    destino_enfermo1 = [100,-14]
+    destino_enfermo2 = [105,-21.2]
+    destino_enfermo3 = [110,-14]
     animal_encalhado1 = [-91.7,-32.0]
     animal_encalhado2 = [-51.0,-19.0]
     animal_encalhado3 = [-7.4,-42.2]
@@ -143,45 +161,44 @@ def main():
     destino_encalhado3 = [37.2,52.5]
     petroleo = [-94.0,45.9]
     frenterampa = [57,11,0]
-    robo = Robot('B', 'F', 'A', frenterampa)
-    
+
+
 
     estado = 'animal_enfermo'
     while True:
-        if estado == 'alinhamento':   
+        if estado == 'alinhamento':
             estado = 'animal_enfermo'
         if estado == 'animal_enfermo':
             robo.claw.Open()
             robo.goTo(animal_enfermo3[0], animal_enfermo3[1])
             robo.claw.Close()
+            robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
             robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
             robo.claw.Open()
-            robo.goBack(15)
-            robo.pointTo(0)
-            
+            realign()
+
             robo.goTo(animal_enfermo2[0], animal_enfermo2[1])
             robo.claw.Close()
-            robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
+            robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
+            robo.goTo(destino_enfermo2[0], destino_enfermo2[1])
             robo.claw.Open()
-            robo.goBack(15)
-            robo.pointTo(0)
+            realign()
 
             robo.goTo(animal_enfermo1[0], animal_enfermo1[1])
             robo.claw.Close()
-            robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
+            robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
             robo.claw.Open()
-            robo.goBack(15)
+            realign()
 
             robo.claw.Close()
             estado = 'animal_encalhado'
+
         if estado == 'animal_encalhado':
             estado = "petroleo"
         if estado == "petroleo":
             estado = 'acabou'
         if estado == 'acabou':
             break
-        
 
-    
-    print(robo.map.points)
+    # print(robo.map.points)
 main()
