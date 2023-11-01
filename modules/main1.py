@@ -1,4 +1,4 @@
-from mindstorms import MSHub, Motor, MotorPair, ColorSensor, DistanceSensor, App
+from mindstorms import MSHub, Motor, MotorPair, ColorSensor, DistanceSensor, App, ForceSensor
 from mindstorms.control import wait_for_seconds, wait_until, Timer
 import math
 
@@ -18,7 +18,7 @@ class Claw:
         self.motor = Motor(claw_port)
         self.motor.set_stop_action('hold')
     def Open(self):
-        self.motor.run_for_rotations(0.3,-25)
+        self.motor.run_for_rotations(0.35,-40)
     def Close(self):
         self.motor.run_for_rotations(0.3,15)
 
@@ -135,68 +135,99 @@ class Robot:
         self.position[1] -= y
         self.map.addPoint(self.position)
 
-robo = Robot('F', 'B', 'A', [0,0,0])
+robo1 = Robot('F', 'B', 'A', [0,0,0], 'D')
 
-def realign():
+def realign(robo):
     last_x = robo.position[0]
     robo.pointTo(0)
-    robo.motors.move(5, 'seconds', 0, -50)
+    while not robo.force_sensor.is_pressed():
+        robo.motors.start(0, -15)
+    robo.motors.stop()
     robo.setRoboPosition([last_x,-60,0])
+
+def align():
+    robo1.motors.move(40, 'cm', 0, 40)
+    robo1.pointTo(128)
+    while not robo1.force_sensor.is_pressed():
+        robo1.motors.start(0, -15)
+    robo1.motors.stop()
+    # robo.setRoboPosition([60,-60,0])
 
 def main():
 
 
-    animal_enfermo1 = [-38.5,32]
-    animal_enfermo2 = [-6,17.5]
-    animal_enfermo3 = [15.0,45]
+    animal_enfermo1 = [-36,27.1]
+    animal_enfermo2 = [0,14.5]
+    animal_enfermo3 = [22,39]
     p_medio_enfermo = [100,-30]
-    destino_enfermo1 = [100,-14]
-    destino_enfermo2 = [105,-21.2]
-    destino_enfermo3 = [110,-14]
-    animal_encalhado1 = [-91.7,-32.0]
-    animal_encalhado2 = [-51.0,-19.0]
-    animal_encalhado3 = [-7.4,-42.2]
-    destino_encalhado1 = [-16,52.5]
+    destino_enfermo1 = [100,-9]
+    destino_enfermo2 = [110,-9]
+    destino_enfermo3 = [117,-9]
+    animal_encalhado1 = [-85,-26.5]
+    animal_encalhado2 = [-45.0,-13.5]
+    animal_encalhado3 = [-2.3,-37.5]
+    destino_encalhado1 = [-16,49]
     destino_encalhado2 = [10.5, 52.5]
     destino_encalhado3 = [37.2,52.5]
     petroleo = [-94.0,45.9]
-    frenterampa = [57,11,0]
+    frenterampa = [57,11]
+    potomedioencalhado = [-3.5,-9]
 
 
-
-    estado = 'animal_enfermo'
+    estado = 'alinhamento'
     while True:
         if estado == 'alinhamento':
+            align()
+            robo = Robot('F', 'B', 'A', [0,0,0], 'D')
+            robo.setRoboPosition([60,-48,0])
             estado = 'animal_enfermo'
         if estado == 'animal_enfermo':
-            robo.claw.Open()
+            # robo.claw.Open()
             robo.goTo(animal_enfermo3[0], animal_enfermo3[1])
             robo.claw.Close()
             robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
-            robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
+            # robo.pointTo(5)
             robo.claw.Open()
-            realign()
+            robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
+            realign(robo)
+            
 
             robo.goTo(animal_enfermo2[0], animal_enfermo2[1])
-            robo.claw.Close()
-            robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
-            robo.goTo(destino_enfermo2[0], destino_enfermo2[1])
-            robo.claw.Open()
-            realign()
-
             robo.goTo(animal_enfermo1[0], animal_enfermo1[1])
+            
             robo.claw.Close()
+            realign(robo)
             robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
             robo.claw.Open()
-            realign()
+            robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
+            realign(robo)
 
-            robo.claw.Close()
             estado = 'animal_encalhado'
 
         if estado == 'animal_encalhado':
-            estado = "petroleo"
+            robo.goTo(potomedioencalhado[0],potomedioencalhado[1])
+            robo.goTo(animal_encalhado2[0], animal_encalhado2[1])
+            robo.goTo(animal_encalhado1[0], animal_encalhado1[1])
+            robo.claw.Close()
+            robo.goTo(destino_encalhado1[0],destino_encalhado1[1])
+            robo.claw.Open()
+
+            robo.goTo(animal_encalhado3[0],animal_encalhado3[1])
+            robo.claw.Close()
+            robo.goTo(destino_encalhado3[0],destino_encalhado3[1])
+            robo.claw.Open()
+            realign(robo)
+
+            estado = "garra"
+        if estado == "garra":
+            robo.goTo(frenterampa[0],freterampa[1])
+            while not robo.force_sensor.is_pressed():
+                robo.motors.start(0, -15)
+            robo.motors.stop()
+            estado = 'petroleo'
         if estado == "petroleo":
-            estado = 'acabou'
+
+            estado = "acabou"
         if estado == 'acabou':
             break
 
