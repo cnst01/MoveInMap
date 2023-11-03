@@ -18,9 +18,11 @@ class Claw:
         self.motor = Motor(claw_port)
         self.motor.set_stop_action('hold')
     def Open(self):
-        self.motor.run_for_rotations(0.35,-40)
+        self.motor.run_for_seconds(0.3,-100)
+        self.motor.set_stop_action('hold')
     def Close(self):
-        self.motor.run_for_rotations(0.3,15)
+        self.motor.run_for_seconds(0.2,100)
+        self.motor.set_stop_action('coast')
 
 class Robot:
     def __init__ (self,motorE,motorD, claw_port = None, position = [0,0,0] ,force_sensor_port = None, speed = 30):
@@ -140,28 +142,37 @@ robo1 = Robot('F', 'B', 'A', [0,0,0], 'D')
 def realign(robo):
     last_x = robo.position[0]
     robo.pointTo(0)
-    while not robo.force_sensor.is_pressed():
+    while robo.force_sensor.get_force_newton() < 2:
         robo.motors.start(0, -15)
     robo.motors.stop()
     robo.setRoboPosition([last_x,-60,0])
 
 def align():
     robo1.motors.move(40, 'cm', 0, 40)
-    robo1.pointTo(128)
-    while not robo1.force_sensor.is_pressed():
+    robo1.pointTo(120)
+    while robo1.force_sensor.get_force_newton() < 2:
         robo1.motors.start(0, -15)
     robo1.motors.stop()
-    # robo.setRoboPosition([60,-60,0])
+    robo1.pointTo(30)
+    while robo1.force_sensor.get_force_newton() < 2:
+        robo1.motors.start(0, -15)
+    robo1.motors.stop()
+    robo1.pointTo(120)
+    while robo1.force_sensor.get_force_newton() < 2:
+        robo1.motors.start(0, -15)
+    robo1.motors.stop()
+
+    #robo2.setRoboPosition([60,-60,0])
 
 def main():
 
 
     animal_enfermo1 = [-36,27.1]
-    animal_enfermo2 = [0,14.5]
-    animal_enfermo3 = [22,39]
-    p_medio_enfermo = [100,-30]
-    destino_enfermo1 = [100,-9]
-    destino_enfermo2 = [110,-9]
+    animal_enfermo2 = [0,24]
+    animal_enfermo3 = [30,54]
+    p_medio_enfermo = [110,-35]
+    destino_enfermo1 = [110,-9]
+    destino_enfermo2 = [110,-19]
     destino_enfermo3 = [117,-9]
     animal_encalhado1 = [-85,-26.5]
     animal_encalhado2 = [-45.0,-13.5]
@@ -179,10 +190,10 @@ def main():
         if estado == 'alinhamento':
             align()
             robo = Robot('F', 'B', 'A', [0,0,0], 'D')
-            robo.setRoboPosition([60,-48,0])
+            robo.setRoboPosition([105,-45,0])
             estado = 'animal_enfermo'
         if estado == 'animal_enfermo':
-            # robo.claw.Open()
+            robo.claw.Open()
             robo.goTo(animal_enfermo3[0], animal_enfermo3[1])
             robo.claw.Close()
             robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
@@ -190,16 +201,17 @@ def main():
             robo.claw.Open()
             robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
             realign(robo)
-            
+
 
             robo.goTo(animal_enfermo2[0], animal_enfermo2[1])
             robo.goTo(animal_enfermo1[0], animal_enfermo1[1])
-            
+
             robo.claw.Close()
+            robo.goTo(36,27.1)
             realign(robo)
             robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
             robo.claw.Open()
-            robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
+            robo.goTo(destino_enfermo2[0], destino_enfermo2[1])
             realign(robo)
 
             estado = 'animal_encalhado'
@@ -229,6 +241,8 @@ def main():
 
             estado = "acabou"
         if estado == 'acabou':
+            robo = Robot('F', 'B', 'A', [0,0,0], 'D')
+            robo.claw.Open()
             break
 
     # print(robo.map.points)
