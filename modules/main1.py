@@ -18,10 +18,10 @@ class Claw:
         self.motor = Motor(claw_port)
         self.motor.set_stop_action('hold')
     def Open(self):
-        self.motor.run_for_seconds(0.3,-100)
+        self.motor.run_for_seconds(0.37,-100)
         self.motor.set_stop_action('hold')
     def Close(self):
-        self.motor.run_for_seconds(0.2,100)
+        self.motor.run_for_seconds(0.33,100)
         self.motor.set_stop_action('coast')
 
 class Robot:
@@ -143,23 +143,24 @@ def realign(robo):
     last_x = robo.position[0]
     robo.pointTo(0)
     while robo.force_sensor.get_force_newton() < 2:
-        robo.motors.start(0, -15)
+        robo.motors.start(0, -25)
     robo.motors.stop()
-    robo.setRoboPosition([last_x,-60,0])
+    robo.setRoboPosition([last_x,-64,0])
 
 def align():
-    robo1.motors.move(40, 'cm', 0, 40)
-    robo1.pointTo(120)
+    robo1.motors.move(40, 'cm', 0, 30)
+    robo1.pointTo(121)
+    robo1.claw.Open()
     while robo1.force_sensor.get_force_newton() < 2:
-        robo1.motors.start(0, -15)
+        robo1.motors.start(0, -25)
     robo1.motors.stop()
-    robo1.pointTo(30)
+    robo1.pointTo(31)
     while robo1.force_sensor.get_force_newton() < 2:
-        robo1.motors.start(0, -15)
+        robo1.motors.start(0, -25)
     robo1.motors.stop()
-    robo1.pointTo(120)
+    robo1.pointTo(121)
     while robo1.force_sensor.get_force_newton() < 2:
-        robo1.motors.start(0, -15)
+        robo1.motors.start(0, -25)
     robo1.motors.stop()
 
     #robo2.setRoboPosition([60,-60,0])
@@ -167,19 +168,20 @@ def align():
 def main():
 
 
-    animal_enfermo1 = [-36,27.1]
-    animal_enfermo2 = [0,24]
-    animal_enfermo3 = [30,54]
-    p_medio_enfermo = [110,-35]
+    animal_enfermo1 = [-35,27.1]
+    animal_enfermo2 = [0,19]
+    animal_enfermo3 = [24,49.5]
+    p_medio_enfermo1 = [105,-35]
+    p_medio_enfermo2 = [110,-60]
     destino_enfermo1 = [110,-9]
-    destino_enfermo2 = [110,-19]
-    destino_enfermo3 = [117,-9]
+    destino_enfermo2 = [120,-35]
+    destino_enfermo3 = [127,-9]
     animal_encalhado1 = [-85,-26.5]
     animal_encalhado2 = [-45.0,-13.5]
-    animal_encalhado3 = [-2.3,-37.5]
+    animal_encalhado3 = [-4.3,-35.5]
     destino_encalhado1 = [-16,49]
     destino_encalhado2 = [10.5, 52.5]
-    destino_encalhado3 = [37.2,52.5]
+    destino_encalhado3 = [37.2,52.2]
     petroleo = [-94.0,45.9]
     frenterampa = [57,11]
     potomedioencalhado = [-3.5,-9]
@@ -190,13 +192,12 @@ def main():
         if estado == 'alinhamento':
             align()
             robo = Robot('F', 'B', 'A', [0,0,0], 'D')
-            robo.setRoboPosition([105,-45,0])
+            robo.setRoboPosition([110,-45,0])
             estado = 'animal_enfermo'
         if estado == 'animal_enfermo':
-            robo.claw.Open()
             robo.goTo(animal_enfermo3[0], animal_enfermo3[1])
             robo.claw.Close()
-            robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
+            robo.goTo(p_medio_enfermo1[0], p_medio_enfermo1[1])
             # robo.pointTo(5)
             robo.claw.Open()
             robo.goTo(destino_enfermo1[0], destino_enfermo1[1])
@@ -209,7 +210,7 @@ def main():
             robo.claw.Close()
             robo.goTo(36,27.1)
             realign(robo)
-            robo.goTo(p_medio_enfermo[0], p_medio_enfermo[1])
+            robo.goTo(p_medio_enfermo2[0], p_medio_enfermo2[1])
             robo.claw.Open()
             robo.goTo(destino_enfermo2[0], destino_enfermo2[1])
             realign(robo)
@@ -223,19 +224,21 @@ def main():
             robo.claw.Close()
             robo.goTo(destino_encalhado1[0],destino_encalhado1[1])
             robo.claw.Open()
+            
 
             robo.goTo(animal_encalhado3[0],animal_encalhado3[1])
             robo.claw.Close()
             robo.goTo(destino_encalhado3[0],destino_encalhado3[1])
             robo.claw.Open()
-            realign(robo)
+            robo.pointTo(0)
+            while robo.force_sensor.get_force_newton() < 2:
+                robo.motors.start(0, -25)
+            robo.motors.stop()
+            robo.setRoboPosition([last_x,-94,0])
 
             estado = "garra"
         if estado == "garra":
-            robo.goTo(frenterampa[0],freterampa[1])
-            while not robo.force_sensor.is_pressed():
-                robo.motors.start(0, -15)
-            robo.motors.stop()
+            
             estado = 'petroleo'
         if estado == "petroleo":
 
